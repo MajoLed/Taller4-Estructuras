@@ -1,9 +1,14 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group = 'com.example'
 version = '1.0-SNAPSHOT'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
 
 repositories {
     mavenCentral()
@@ -15,6 +20,44 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// ./gradlew run --args="--tabla BST --cola MONTICULO"
+application {
+    mainClass = 'Indice'
+    applicationDefaultJvmArgs = ['-ea', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']
+}
+
+tasks.named('run') {
+    workingDir = rootDir
+}
+
+// ./gradlew test  -> todas las pruebas con assert (aserciones habilitadas)
 test {
     useJUnitPlatform()
+    workingDir = rootDir
+    enableAssertions = true
+    testLogging { events 'passed', 'failed'; exceptionFormat = 'full'; showStandardStreams = true }
+}
+
+// ./gradlew experimentos --args="6a 6b"   (sin argumentos: todos los incisos del punto 6)
+tasks.register('experimentos', JavaExec) {
+    group = 'taller'
+    description = 'Evaluación experimental (punto 6): escribe los CSV en resultados/'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'Experimentos'
+    workingDir = rootDir
+    jvmArgs = ['-Xmx2g', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']
+}
+
+// ./gradlew seleccion --args="<id1> <id2> <id3>"
+tasks.register('seleccion', JavaExec) {
+    group = 'taller'
+    description = 'Selección de la combinación (punto 4): SHA-256 de los ID mod 9'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'SeleccionCombinacion'
+    workingDir = rootDir
+    jvmArgs = ['-Dstdout.encoding=UTF-8']
 }

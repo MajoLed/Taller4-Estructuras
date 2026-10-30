@@ -1,147 +1,95 @@
-import java.util.NoSuchElementException;
-
 /**
- * Tabla de símbolos ordenada con dos arreglos paralelos ordenados (keys[], vals[]) y búsqueda binaria.
- * Los arreglos se redimensionan duplicando cuando se llenan.
+ * Árbol rojo-negro inclinado a la izquierda (LLRB, Sedgewick y Wayne), con size en cada nodo.
  *
- * Modelo de costo (documentado para el informe):
- *  - compares: una comparación de tres vías por iteración de la búsqueda binaria (compare(a,b)),
- *    más 1 por la comprobación lo > hi en keys(lo, hi). No se cuenta la igualdad aparte.
- *  - moves: cada par (llave, valor) desplazado una posición en put cuenta 1.
- *    (La copia por redimensionamiento NO se cuenta como move.)
+ * put es recursivo: la profundidad de la recursión es la altura, acotada por 2 lg M (≈ 29 para
+ * M = 22 944), así que no hay riesgo de desbordar la pila en ningún orden de inserción.
+ * Las lecturas (get, rank, keys, ...) son las iterativas de ArbolBusqueda.
  *
- * Invariantes: 0 <= n <= keys.length; keys[0..n-1] estrictamente creciente (orden ordinal);
- * vals[i] es el valor de keys[i].
+ * Instrumentación: rotations cuenta cada rotateLeft/rotateRight; flips cuenta cada flipColors.
+ *
+ * Invariantes (además de los de ArbolBusqueda): ningún enlace rojo a la derecha, ningún nodo con dos
+ * enlaces rojos seguidos (is23), raíz negra, y todo camino raíz-null con el mismo número de enlaces
+ * negros (isBalanced). Las rotaciones recalculan size, de modo que isSizeConsistent se mantiene.
  */
-public class BinarySearchST implements TablaOrdenada {
-    private String[] keys;
-    private int[] vals;
-    private int n;
-    private long compares, moves;
+public class RedBlackBST extends ArbolBusqueda {
 
-    public BinarySearchST() { keys = new String[2]; vals = new int[2]; }
-
-    private int compare(String a, String b) { compares++; return a.compareTo(b); }
-
-    /** Devuelve i >= 0 si keys[i] == key; si no, -(punto de inserción) - 1. */
-    private int search(String key) {
-        int lo = 0, hi = n - 1;
-        while (lo <= hi) {
-            int mid = lo + (hi - lo) / 2;
-            int c = compare(key, keys[mid]);
-            if (c < 0) hi = mid - 1;
-            else if (c > 0) lo = mid + 1;
-            else return mid;
-        }
-        return -lo - 1;
-    }
-
-    private void resize(int cap) {
-        String[] k = new String[cap]; int[] v = new int[cap];
-        for (int i = 0; i < n; i++) { k[i] = keys[i]; v[i] = vals[i]; }
-        keys = k; vals = v;
-    }
+    private static boolean isRed(Node x) { return x != null && x.color == RED; }
 
     @Override public void put(String key, int val) {
-        if (key == null) throw new IllegalArgumentException("llave null");
-        int i = search(key);
-        if (i >= 0) { vals[i] = val; return; }
-        int ins = -i - 1;
-        if (n == keys.length) resize(2 * n);
-        for (int j = n; j > ins; j--) { keys[j] = keys[j - 1]; vals[j] = vals[j - 1]; moves++; }
-        keys[ins] = key; vals[ins] = val; n++;
+        validar(key);
+        root = put(root, key, val);
+        root.color = BLACK;
     }
 
-    @Override public Integer get(String key) {
-        if (key == null) throw new IllegalArgumentException("llave null");
-        int i = search(key);
-        return i >= 0 ? Integer.valueOf(vals[i]) : null;
+    private Node put(Node h, String key, int val) {
+        if (h == null) return new Node(key, val, 1, RED);
+        int c = compare(key, h.key);
+        if (c < 0) h.left = put(h.left, key, val);
+        else if (c > 0) h.right = put(h.right, key, val);
+        else h.val = val;
+
+        if (isRed(h.right) && !isRed(h.left)) h = rotateLeft(h);
+        if (isRed(h.left) && isRed(h.left.left)) h = rotateRight(h);
+        if (isRed(h.left) && isRed(h.right)) flipColors(h);
+        h.size = 1 + size(h.left) + size(h.right);
+        return h;
     }
 
-    @Override public boolean contains(String key) { return get(key) != null; }
-    @Override public int size() { return n; }
-    @Override public boolean isEmpty() { return n == 0; }
-
-    @Override public String min() { if (n == 0) throw new NoSuchElementException("tabla vacía"); return keys[0]; }
-    @Override public String max() { if (n == 0) throw new NoSuchElementException("tabla vacía"); return keys[n - 1]; }
-
-    @Override public String floor(String key) {
-        int i = search(key);
-        if (i >= 0) return keys[i];
-        int ins = -i - 1;
-        return ins == 0 ? null : keys[ins - 1];
+    private Node rotateLeft(Node h) {
+        rotations++;
+        Node x = h.right;
+        h.right = x.left;
+        x.left = h;
+        x.color = h.color;
+        h.color = RED;
+        x.size = h.size;
+        h.size = 1 + size(h.left) + size(h.right);
+        return x;
     }
 
-    @Override public String ceiling(String key) {
-        int i = search(key);
-        if (i >= 0) return keys[i];
-        int ins = -i - 1;
-        return ins == n ? null : keys[ins];
+    private Node rotateRight(Node h) {
+        rotations++;
+        Node x = h.left;
+        h.left = x.right;
+        x.right = h;
+        x.color = h.color;
+        h.color = RED;
+        x.size = h.size;
+        h.size = 1 + size(h.left) + size(h.right);
+        return x;
     }
 
-    @Override public int rank(String key) {
-        int i = search(key);
-        return i >= 0 ? i : -i - 1;
+    private void flipColors(Node h) {
+        flips++;
+        h.color = !h.color;
+        h.left.color = !h.left.color;
+        h.right.color = !h.right.color;
     }
 
-    @Override public String select(int k) {
-        if (k < 0 || k >= n) throw new IllegalArgumentException("rango fuera de [0, size()-1]: " + k);
-        return keys[k];
+    // ------------------------------------------------------------------ verificadores propios
+    /** Ningún enlace rojo a la derecha, ningún par de rojos seguidos a la izquierda, raíz negra. */
+    public boolean is23() {
+        if (isRed(root)) return false;
+        return is23(root);
     }
 
-    @Override public Iterable<String> keys() {
-        Cola<String> q = new Cola<>();
-        for (int i = 0; i < n; i++) q.enqueue(keys[i]);
-        return q;
+    private boolean is23(Node x) {
+        if (x == null) return true;
+        if (isRed(x.right)) return false;
+        if (isRed(x) && isRed(x.left)) return false;
+        return is23(x.left) && is23(x.right);
     }
 
-    /** Índices [desde, hasta] de las llaves en [lo, hi]; hasta < desde si el rango es vacío. */
-    private int[] indices(String lo, String hi) {
-        if (compare(lo, hi) > 0) return new int[]{0, -1};
-        int desde = rank(lo);
-        int s = search(hi);
-        int hasta = s >= 0 ? s : -s - 2;
-        return new int[]{desde, hasta};
+    /** Todos los caminos de la raíz a un enlace nulo tienen el mismo número de enlaces negros. */
+    public boolean isBalanced() {
+        int negros = 0;
+        for (Node x = root; x != null; x = x.left) if (!isRed(x)) negros++;
+        return isBalanced(root, negros);
     }
 
-    @Override public Iterable<String> keys(String lo, String hi) {
-        Cola<String> q = new Cola<>();
-        int[] r = indices(lo, hi);
-        for (int i = r[0]; i <= r[1]; i++) q.enqueue(keys[i]);
-        return q;
-    }
-
-    @Override public Iterable<Entrada> entries(String lo, String hi) {
-        Cola<Entrada> q = new Cola<>();
-        int[] r = indices(lo, hi);
-        for (int i = r[0]; i <= r[1]; i++) q.enqueue(new Entrada(keys[i], vals[i]));
-        return q;
-    }
-
-    @Override public long compares() { return compares; }
-    @Override public long moves() { return moves; }
-    @Override public long rotations() { return 0; }
-    @Override public long flips() { return 0; }
-    @Override public void resetCounters() { compares = 0; moves = 0; }
-
-    // ---- Verificadores ----
-    @Override public boolean isBST() {
-        for (int i = 1; i < n; i++) if (keys[i - 1].compareTo(keys[i]) >= 0) return false;
-        return true;
-    }
-
-    @Override public boolean isSizeConsistent() {
-        if (n < 0 || n > keys.length || keys.length != vals.length) return false;
-        for (int i = 0; i < n; i++) if (keys[i] == null) return false;
-        return true;
-    }
-
-    @Override public boolean isRankConsistent() {
-        long c = compares;
-        boolean ok = true;
-        for (int i = 0; i < n && ok; i++) if (rank(select(i)) != i) ok = false;
-        for (int i = 0; i < n && ok; i++) if (!select(rank(keys[i])).equals(keys[i])) ok = false;
-        compares = c;
-        return ok;
+    private boolean isBalanced(Node x, int negros) {
+        if (x == null) return negros == 0;
+        if (!isRed(x)) negros--;
+        return isBalanced(x.left, negros) && isBalanced(x.right, negros);
     }
 }

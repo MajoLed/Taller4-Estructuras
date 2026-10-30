@@ -1,11 +1,15 @@
 import java.util.Arrays;
 
 /*
- * Pruebas con assert. Ejecutar con: java -ea PruebasTokenizador
+ * Pruebas del Tokenizador y del ADT Entrada (punto 1), con assert.
+ * Ejecutar con: java -ea PruebasTokenizador  (o ./gradlew test, que ejecuta todas las pruebas con -ea).
  * */
 
 public class PruebasTokenizador {
     public static void main(String[] args) {
+        // Caso del enunciado: mayúsculas, tildes, ñ, ü, dígitos y puntuación
+        assert Arrays.equals(Tokenizador.tokenizar("¿Qué? Señor, 2 pingüinos..."),
+                new String[]{"qué", "señor", "pingüinos"});
         // Mayúsculas con tilde y ñ
         assert Arrays.equals(Tokenizador.tokenizar("ÁRBOL NIÑO ÜBER"),
                 new String[]{"árbol", "niño", "über"});
@@ -19,6 +23,8 @@ public class PruebasTokenizador {
         assert Arrays.equals(Tokenizador.tokenizar("a b a"), new String[]{"a", "b", "a"});
         // Letras fuera del alfabeto del enunciado (ç, à) son separadores
         assert Arrays.equals(Tokenizador.tokenizar("caça"), new String[]{"ca", "a"});
+        // Saltos de línea y tabulaciones también separan
+        assert Arrays.equals(Tokenizador.tokenizar("fin\nde\tlínea"), new String[]{"fin", "de", "línea"});
         // null se rechaza
         try { Tokenizador.tokenizar(null); assert false; } catch (IllegalArgumentException ok) { }
 
