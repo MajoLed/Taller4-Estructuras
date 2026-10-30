@@ -36,7 +36,6 @@ public abstract class ArbolBusqueda implements TablaOrdenada {
     protected Node root;
     protected long compares, rotations, flips;
 
-    /** Única comparación de llaves de la estructura: tres vías, cuenta 1. */
     protected final int compare(String a, String b) { compares++; return a.compareTo(b); }
 
     protected static int size(Node x) { return x == null ? 0 : x.size; }
@@ -126,7 +125,6 @@ public abstract class ArbolBusqueda implements TablaOrdenada {
         }
     }
 
-    // ------------------------------------------------------------------ iteración
     /** Recorrido en orden completo, sin comparar llaves. */
     @Override public Iterable<String> keys() {
         Cola<String> q = new Cola<>();

@@ -7,9 +7,11 @@ consultas — **frecuencia**, **top-K** y **autocompletado por prefijo** — imp
 símbolos ordenadas propias (BinarySearchST, BST, RedBlackBST) y colas de prioridad propias (arreglo
 desordenado, arreglo ordenado, montículo binario), instrumentadas para la evaluación experimental.
 
-**Equipo**: `Ledesma Maria - 000559241` · `Puente Miguel Angel - 000`
+**Equipo**: `Ledesma Maria - 000559241` · `Puente Miguel Angel - 000559418`
 
-**Combinación asignada**: `<completar con ./gradlew seleccion --args="<id1> <id2> <id3>">`
+**Combinación asignada**: 
+- `Tabla de símbolos - BinarySearchST`
+- `Cola de prioridad - Arreglo Ordenado`
 
 ## Requisitos
 
