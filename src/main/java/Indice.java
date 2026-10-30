@@ -26,7 +26,7 @@ public final class Indice {
     public enum TipoTabla {
         BINARY_SEARCH_ST, BST, RED_BLACK_BST;
 
-        public TablaOrdenada nueva() {
+        public TablaOrdenada nueva(RED_BLACK_BST) {
             return switch (this) {
                 case BINARY_SEARCH_ST -> new BinarySearchST();
                 case BST -> new BST();

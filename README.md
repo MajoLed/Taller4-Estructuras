@@ -2,125 +2,140 @@
 
 Estructuras de Datos y Algoritmos · Facultad TIC · UPB · 2026-20
 
-Índice de frecuencias de palabras de *Don Quijote de la Mancha* (Project Gutenberg #2000) con tres
-consultas — **frecuencia**, **top-K** y **autocompletado por prefijo** — implementado con tablas de
-símbolos ordenadas propias (BinarySearchST, BST, RedBlackBST) y colas de prioridad propias (arreglo
-desordenado, arreglo ordenado, montículo binario), instrumentadas para la evaluación experimental.
+Implementación de un índice de frecuencias de palabras a partir del texto *Don Quijote de la Mancha*, utilizando tablas de símbolos y colas de prioridad.
 
-**Equipo**: `Ledesma Maria - 000559241` · `Puente Miguel Angel - 000559418`
+## Integrantes
 
-**Combinación asignada**: 
-- `Tabla de símbolos - BinarySearchST`
-- `Cola de prioridad - Arreglo Ordenado`
+- Maria Jose Ledesma - 0000559241
+- Miguel Angel Puente Mejía - 0000559418
 
-## Requisitos
+## Descripción
 
-- JDK 21 (Gradle descarga el resto con el wrapper).
-- `pg2000.txt` en la raíz del repositorio (UTF-8, https://www.gutenberg.org/cache/epub/2000/pg2000.txt).
-- Opcional, para la hoja de cálculo: Python 3 con `openpyxl`.
+El proyecto permite procesar un archivo de texto, contabilizar la frecuencia de sus palabras y realizar consultas sobre la información obtenida.
 
-## Uso rápido
+Entre sus funcionalidades se encuentran:
+
+- Construcción de un índice de frecuencias.
+- Consulta de las palabras más frecuentes.
+- Búsqueda de palabras y consulta de sus posiciones mediante `rank`.
+- Obtención de las palabras mínima y máxima.
+- Autocompletado de palabras a partir de prefijos.
+- Medición de operaciones y tiempos de ejecución.
+
+## Estructuras de datos
+
+El proyecto implementa diferentes estructuras para almacenar y consultar las frecuencias de las palabras.
+
+### Tablas de símbolos
+
+- **BinarySearchST:** tabla de símbolos implementada mediante arreglos ordenados y búsqueda binaria.
+- **BST:** árbol binario de búsqueda.
+- **RedBlackBST:** árbol binario de búsqueda balanceado mediante reglas de colores y rotaciones.
+
+### Colas de prioridad
+
+- **MinPQDesordenada:** cola de prioridad implementada mediante un arreglo desordenado.
+- **MinPQOrdenada:** cola de prioridad implementada mediante un arreglo ordenado.
+- **MonticuloBinario:** cola de prioridad implementada mediante un montículo binario.
+
+## Combinación asignada
+
+La combinación seleccionada para el desarrollo y análisis del proyecto es:
+
+**RedBlackBST + Montículo binario**
+
+La selección se obtiene a partir de los identificadores institucionales de los integrantes, mediante el cálculo SHA-256 y la operación módulo 9.
+
+| Identificador | Valor |
+|---|---|
+| Integrante 1 | `0000559241` |
+| Integrante 2 | `0000559418` |
+| SHA-256 | `88b0113335defc408e81069825fb307c2d4dcdd34459e719d493a82fda9b77e2` |
+| Resultado módulo 9 | `8` |
+
+## Funcionalidades
+
+### Índice de frecuencias
+
+Procesa el texto de entrada y registra la cantidad de apariciones de cada palabra.
+
+### Top-K
+
+Obtiene las K palabras con mayor frecuencia utilizando una cola de prioridad.
+
+### Autocompletado
+
+Busca palabras que coinciden con un prefijo determinado y las organiza según su frecuencia.
+
+### Consultas
+
+Permite consultar la frecuencia de una palabra, su posición en la tabla de símbolos y los valores mínimo y máximo.
+
+### Análisis de rendimiento
+
+Registra tiempos de ejecución y contadores de operaciones para estudiar el comportamiento de las estructuras implementadas.
+
+## Tecnologías y requisitos
+
+- Java 21.
+- Gradle.
+- JUnit para pruebas.
+
+## Ejecución
+
+Para ejecutar las pruebas:
 
 ```bash
-./gradlew test                                             # todas las pruebas (assert habilitados)
-./gradlew run                                              # índice completo: RedBlackBST + montículo
-./gradlew run --args="--tabla BST --cola DESORDENADA"      # cualquier combinación
-./gradlew run --args="--n 50000 --k 100 --kp 5"            # primeras N palabras, K y K'
-./gradlew seleccion --args="<id1> <id2> <id3>"             # punto 4: combinación del equipo
-./gradlew experimentos                                     # punto 6 completo → resultados/*.csv
-./gradlew experimentos --args="6c 6e --reps 10"            # solo algunos incisos
-python3 scripts/generar_hoja.py                            # resultados/Taller4-resultados.xlsx
+./gradlew test
 ```
 
-Nombres aceptados: tablas `BINARY_SEARCH_ST` (`BS`), `BST`, `RED_BLACK_BST` (`RB`); colas
-`DESORDENADA`, `ORDENADA`, `MONTICULO` (`HEAP`).
-
-Sin Gradle (las pruebas son programas con `assert`, salvo el puente JUnit `PruebasTest`):
+Ejecutar el programa con la combinación asignada:
 
 ```bash
-javac -encoding UTF-8 -d out src/main/java/*.java $(ls src/test/java/Pruebas*.java | grep -v PruebasTest)
-java -ea -cp out Indice --tabla BST --cola MONTICULO
-java -ea -cp out PruebasTablas        # ídem PruebasColas, PruebasTokenizador, PruebasSeleccion, PruebasIndice
+./gradlew run --args="--tabla RED_BLACK_BST --cola MONTICULO"
 ```
 
-Ejemplo de salida (`./gradlew run`):
+Calcular la combinación a partir de los identificadores:
 
-```
-N = 383637   M = 22944   Q = 295
-Top-10: que (20769), de (18410), y (18272), la (10492), a (9876), en (8285), el (8267), no (6346), los (4769), se (4752)
-Autocompletado de dul (R = 12): dulcinea (286), dulce (26), dulces (5), dulcísima (4), dulcineas (2)
-Autocompletado de san (R = 53): sancho (2174), sansón (77), sangre (65), santa (49), san (32)
-rank("quijote") = 17881   min() = a   max() = útiles
+```bash
+./gradlew seleccion --args="0000559241 0000559418"
 ```
 
-Las **9 combinaciones** reproducen todos los valores de verificación del enunciado y coinciden
-exactamente con la implementación de referencia `TreeMap` + `PriorityQueue`.
+## Experimentos
 
-## Estructura
+Los experimentos permiten evaluar el comportamiento de las estructuras mediante diferentes operaciones y configuraciones.
 
-```
-src/main/java/
-  Tokenizador.java, Entrada.java               punto 1: tokenización y ADT Entrada
-  TablaOrdenada.java                           punto 2: API común de tabla ordenada
-  BinarySearchST.java                            arreglos paralelos + búsqueda binaria
-  ArbolBusqueda.java, BST.java, RedBlackBST.java árboles (lecturas iterativas comunes)
-  ColaPrioridad.java                           punto 3: API común de MinPQ genérica
-  MinPQDesordenada.java, MinPQOrdenada.java, MonticuloBinario.java
-  Cola.java, Pila.java                         estructuras auxiliares propias
-  SeleccionCombinacion.java                    punto 4: SHA-256 mod 9
-  Indice.java                                  punto 5: fases A, B, C y medición
-  IndiceReferencia.java                        punto 6f: TreeMap + PriorityQueue
-  Experimentos.java, Estadistica.java          punto 6: CSV y ajustes potenciales
-src/test/java/
-  PruebasTokenizador, PruebasTablas, PruebasColas, PruebasSeleccion, PruebasIndice   (assert)
-  PruebasTest                                  puente JUnit para ./gradlew test
-scripts/generar_hoja.py                        CSV → hoja de cálculo con gráficas y tendencias
-resultados/                                    CSV del punto 6 y hoja de cálculo
-docs/                                          documentación técnica (ver abajo)
-desarrollo-ia/                                 entregable de ingeniería con IA (PRD, prompts, validación)
+Para ejecutar un experimento específico:
+
+```bash
+./gradlew experimentos --args="6a"
 ```
 
-## Documentación
+Para ejecutar todos los experimentos disponibles:
 
-| Documento | Para qué |
-|---|---|
-| [docs/RAZONAMIENTO.md](docs/RAZONAMIENTO.md) | Por qué se construyó así: tabla ordenada y contigüidad del rango del prefijo, σ, desempate, fases, diseño de cada estructura, instrumentación, recursión (6d), medición |
-| [docs/FLUJO.md](docs/FLUJO.md) | Flujo de datos y de control (diagramas), clases, recorrido podado, experimentos y sus CSV |
-| [docs/PUNTOS-CLAVE.md](docs/PUNTOS-CLAVE.md) | Archivo y línea que cumple cada objetivo, contadores verificados a mano, mapa con la rúbrica |
-| [desarrollo-ia/README.md](desarrollo-ia/README.md) | PRD, prompts, validación crítica y problemas por componente |
+```bash
+./gradlew experimentos
+```
 
-## Decisiones principales
+Los resultados generados se almacenan en la carpeta `resultados/`, en formato CSV.
 
-- **Orden ordinal** (`String.compareTo`) y rango de prefijo `[p, p + '￿']`: las letras con tilde y
-  la `ñ` quedan después de la `z`, así que `'~'` o `'z'` perderían palabras.
-- **Relevancia**: mayor frecuencia; a igual frecuencia, palabra menor. Orden total ⇒ top-K único.
-- **`entries()` / `entries(lo, hi)`**: los recorridos entregan el par (palabra, frecuencia) para no
-  repetir una búsqueda por llave; el orden de inserción en la cola es el mismo que con `keys()`.
-- **Árboles iterativos**: el BST degenerado del inciso 6d (altura 22 943) se procesa completo sin
-  desbordar la pila. El `put` del rojo-negro es recursivo porque su altura está acotada por 2 lg M.
-- **Un solo `compare` por estructura**: cada comparación de tres vías cuenta exactamente 1.
-- Sin colecciones ni ordenamientos de la biblioteca en la lógica de tablas y colas (solo en
-  `IndiceReferencia` y como oráculo en las pruebas).
+## Organización del proyecto
 
-## Estado de los entregables
+La organización general del código es la siguiente:
 
-| Entregable (enunciado) | Estado |
-|---|---|
-| Código: tokenizador, Entrada, 3 tablas, 3 colas, programa del índice, referencia 6f | ✅ |
-| Pruebas unitarias con `assert` (bordes, verificadores, contadores a mano) | ✅ `./gradlew test` |
-| Datos experimentales del punto 6 (todos los incisos, 10 repeticiones, media y sd) | ✅ `resultados/*.csv` |
-| Hoja de cálculo con datos, gráficas y líneas de tendencia con ecuación y R² | ✅ generada por `scripts/generar_hoja.py`; revisar el formato en Excel/LibreOffice |
-| `desarrollo-ia/` (PRD, prompts, validación, problemas) | ✅ — **faltan las reflexiones de propiedad del equipo** |
-| Documento de análisis (Word/PDF): hash y combinación, valores de verificación, **punto 7**, gráficas e interpretación del **punto 6**, **punto 8**, recursión en 6d | ⏳ **a cargo del equipo** (el enunciado prohíbe delegar el análisis del punto 7 y la interpretación de 6 y 8) |
+```text
+Taller4-Estructuras/
+├── src/
+│   ├── main/
+│   │   └── java/
+│   └── test/
+│       └── java/
+├── resultados/
+├── pg2000.txt
+├── build.gradle
+├── settings.gradle
+└── README.md
+```
 
-### Pendientes del equipo antes de entregar
+El código fuente contiene las implementaciones de las estructuras, las clases encargadas del procesamiento del texto y los programas de ejecución de los experimentos.
 
-1. Calcular la combinación con `./gradlew seleccion --args="<ids>"` y registrarla aquí, en
-   `desarrollo-ia/README.md` y en el informe.
-2. Escribir los nombres de los integrantes en este README y en los archivos fuente y documentos
-   (el enunciado exige marcar todos los archivos).
-3. Escribir las secciones *Entender y descomponer* (sin IA) y *Reflexión final* de cada archivo de
-   `desarrollo-ia/`.
-4. Redactar el informe (puntos 6, 7 y 8) a partir de `resultados/` y la hoja de cálculo.
-5. Indicar en el informe la ruta esperada de `pg2000.txt` (raíz del proyecto) y la fecha de descarga.
-6. Entregar `Taller4-<Apellido1Nombre1><ID1>-...zip` **sin** `pg2000.txt` ni `build/`.
